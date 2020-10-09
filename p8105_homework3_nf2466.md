@@ -166,7 +166,12 @@ Part c
  accel_df_p =
   accel_df %>%
   ggplot(aes(x = activity_minute, y = activity_count, color = day)) + 
-   geom_smooth(se=FALSE) 
+   geom_smooth(se=FALSE) +
+  labs(
+    title = "Daily activity by day",
+    x = "Minutes in a day (24 hours)",
+    y = "Activity count"
+  )
 
 ggsave("accel_df_p.pdf", accel_df_p, width = 8, height = 5)
 ```
@@ -181,7 +186,55 @@ accel_df_p
 
 <img src="p8105_homework3_nf2466_files/figure-gfm/unnamed-chunk-8-1.png" width="90%" />
 
-Accelerometer data allows the inspection activity over the course of the
-day. Make a single-panel plot that shows the 24-hour activity time
-courses for each day and use color to indicate day of the week. Describe
-in words any patterns or conclusions you can make based on this graph
+It appears that there is an expected pattern of low activity during
+sleeping hours and more activity during the middle of the day (between
+minute 500-1000). We also see that on average, there is more activity in
+the morning/afternoon on Sunday and more activity in the evening time on
+Fridays.
+
+-----
+
+\#\#\#Problem 3
+
+Download the NOAA dataset from P8105
+
+``` r
+library(p8105.datasets)
+data("ny_noaa")
+```
+
+In this dataset, there are 2595176 rows and 7 columns. There are 747
+distinct locations in New York state. The variables also include the
+date of data collection, between 1981-01-01 and 2010-12-31,
+precipitation, snowfall, snow depth, max temp and min temp in Celsius.
+There are 145838 missing values for precipitation, 381221 missing values
+for snowfall, 591786 missing values for snow depth, 1134358 missing
+values for max temp and 1134420 missing values for min temp.
+
+Data cleaning: Do some data cleaning. Create separate variables for
+year, month, and day. Ensure observations for temperature,
+precipitation, and snowfall are given in reasonable units. For snowfall,
+what are the most commonly observed values? Why?
+
+``` r
+ny_noaa%>%
+  janitor::clean_names()%>%
+  separate(date, into = c('year','month','day')) %>%
+  mutate(month = month.abb[as.factor(month)]) %>%
+  mutate_at(vars(year, day, tmax, tmin), as.numeric)
+```
+
+    ## # A tibble: 2,595,176 x 9
+    ##    id           year month   day  prcp  snow  snwd  tmax  tmin
+    ##    <chr>       <dbl> <chr> <dbl> <int> <int> <int> <dbl> <dbl>
+    ##  1 US1NYAB0001  2007 Nov       1    NA    NA    NA    NA    NA
+    ##  2 US1NYAB0001  2007 Nov       2    NA    NA    NA    NA    NA
+    ##  3 US1NYAB0001  2007 Nov       3    NA    NA    NA    NA    NA
+    ##  4 US1NYAB0001  2007 Nov       4    NA    NA    NA    NA    NA
+    ##  5 US1NYAB0001  2007 Nov       5    NA    NA    NA    NA    NA
+    ##  6 US1NYAB0001  2007 Nov       6    NA    NA    NA    NA    NA
+    ##  7 US1NYAB0001  2007 Nov       7    NA    NA    NA    NA    NA
+    ##  8 US1NYAB0001  2007 Nov       8    NA    NA    NA    NA    NA
+    ##  9 US1NYAB0001  2007 Nov       9    NA    NA    NA    NA    NA
+    ## 10 US1NYAB0001  2007 Nov      10    NA    NA    NA    NA    NA
+    ## # ... with 2,595,166 more rows

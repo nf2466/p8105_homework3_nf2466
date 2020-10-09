@@ -133,4 +133,28 @@ ggsave("accel_df_p.pdf", accel_df_p, width = 8, height = 5)
 accel_df_p
 
 ```
+
 It appears that there is an expected pattern of low activity during sleeping hours and more activity during the middle of the day (between minute 500-1000). We also see that on average, there is more activity in the morning/afternoon on Sunday and more activity in the evening time on Fridays.
+
+---
+###Problem 3
+
+Download the NOAA dataset from P8105
+```{r}
+library(p8105.datasets)
+data("ny_noaa")
+
+```
+In this dataset, there are `r nrow(ny_noaa)` rows and `r ncol(ny_noaa)` columns. There are `r ny_noaa%>%distinct(id)%>%count()` distinct locations in New York state. The variables also include the date of data collection, between `r min(ny_noaa$date)` and `r max(ny_noaa$date)`, precipitation, snowfall, snow depth, max temp and min temp in Celsius. There are `r sum(is.na(ny_noaa$prcp))` missing values for precipitation, `r sum(is.na(ny_noaa$snow))` missing values for snowfall, `r sum(is.na(ny_noaa$snwd))` missing values for snow depth, `r sum(is.na(ny_noaa$tmax))` missing values for max temp and `r sum(is.na(ny_noaa$tmin))` missing values for min temp.
+
+Data cleaning: Do some data cleaning. Create separate variables for year, month, and day. Ensure observations for temperature, precipitation, and snowfall are given in reasonable units. For snowfall, what are the most commonly observed values? Why?
+```{r}
+ny_noaa%>%
+  janitor::clean_names()%>%
+  separate(date, into = c('year','month','day')) %>%
+  mutate(month = month.abb[as.factor(month)]) %>%
+  mutate_at(vars(year, day, tmax, tmin), as.numeric)
+            
+```
+
+
