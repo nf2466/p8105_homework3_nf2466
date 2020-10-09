@@ -81,3 +81,56 @@ instacart %>%
 	)
 ```
 ### Problem 2
+
+Load the dataset and tidy
+```{r}
+accel_df=
+  read_csv("./data/accel_data.csv") %>%
+  janitor::clean_names()%>%
+  pivot_longer(activity_1:activity_1440, names_to = "activity_minute", names_prefix = "activity_", values_to = "activity_count")%>%
+  mutate(activity_minute = as.numeric(activity_minute),
+         day_id=as.factor(day_id),
+         day=as.factor(day),
+  day = factor(day, levels = str_c(c("Mon", "Tues", "Wednes", "Thurs", "Fri", "Satur", "Sun"),"day"))
+  )%>%
+  arrange(week, day)%>%
+  mutate(
+  day_type=recode(day, "Saturday" = "weekend", "Sunday" = "weekend", 
+                  "Monday" = "weekday", "Tuesday" = "weekday", "Wednesday" = "weekday", 
+                  "Thursday" = "weekday","Friday" = "weekday")
+  )
+   
+```
+Part b: Now, aggregate total day activity count.
+
+```{r}
+
+accel_df%>%
+  group_by(week,day)%>%
+  summarize(count_total=sum(activity_count))%>%
+  pivot_wider(
+    names_from= day,
+    values_from = count_total
+  )%>%
+  knitr::kable()
+```
+There doesn't appear to be a strong pattern in terms of the total activity count over the 5 weeks. Overall, the activity total appears highest on Mondays and lowest on Saturdays.
+
+Part c
+```{r}
+ accel_df_p =
+  accel_df %>%
+  ggplot(aes(x = activity_minute, y = activity_count, color = day)) + 
+   geom_smooth(se=FALSE) +
+  labs(
+    title = "Daily activity by day",
+    x = "Minutes in a day (24 hours)",
+    y = "Activity count"
+  )
+
+ggsave("accel_df_p.pdf", accel_df_p, width = 8, height = 5)
+
+accel_df_p
+
+```
+It appears that there is an expected pattern of low activity during sleeping hours and more activity during the middle of the day (between minute 500-1000). We also see that on average, there is more activity in the morning/afternoon on Sunday and more activity in the evening time on Fridays.

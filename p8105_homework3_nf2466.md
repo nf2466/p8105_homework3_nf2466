@@ -1,7 +1,7 @@
 Homework 2
 ================
 Nancy Fang (nf2466)
-2020-10-08
+2020-10-09
 
 ### Problem 1
 
@@ -104,3 +104,84 @@ instacart %>%
     ## 2 Pink Lady Apples  13.4  11.4  11.7  14.2  11.6  12.8  11.9
 
 ### Problem 2
+
+Load the dataset and tidy
+
+``` r
+accel_df=
+  read_csv("./data/accel_data.csv") %>%
+  janitor::clean_names()%>%
+  pivot_longer(activity_1:activity_1440, names_to = "activity_minute", names_prefix = "activity_", values_to = "activity_count")%>%
+  mutate(activity_minute = as.numeric(activity_minute),
+         day_id=as.factor(day_id),
+         day=as.factor(day),
+  day = factor(day, levels = str_c(c("Mon", "Tues", "Wednes", "Thurs", "Fri", "Satur", "Sun"),"day"))
+  )%>%
+  arrange(week, day)%>%
+  mutate(
+  day_type=recode(day, "Saturday" = "weekend", "Sunday" = "weekend", 
+                  "Monday" = "weekday", "Tuesday" = "weekday", "Wednesday" = "weekday", 
+                  "Thursday" = "weekday","Friday" = "weekday")
+  )
+```
+
+    ## Parsed with column specification:
+    ## cols(
+    ##   .default = col_double(),
+    ##   day = col_character()
+    ## )
+
+    ## See spec(...) for full column specifications.
+
+Part b: Now, aggregate total day activity count.
+
+``` r
+accel_df%>%
+  group_by(week,day)%>%
+  summarize(count_total=sum(activity_count))%>%
+  pivot_wider(
+    names_from= day,
+    values_from = count_total
+  )%>%
+  knitr::kable()
+```
+
+    ## `summarise()` regrouping output by 'week' (override with `.groups` argument)
+
+| week |    Monday |  Tuesday | Wednesday | Thursday |   Friday | Saturday | Sunday |
+| ---: | --------: | -------: | --------: | -------: | -------: | -------: | -----: |
+|    1 |  78828.07 | 307094.2 |    340115 | 355923.6 | 480542.6 |   376254 | 631105 |
+|    2 | 295431.00 | 423245.0 |    440962 | 474048.0 | 568839.0 |   607175 | 422018 |
+|    3 | 685910.00 | 381507.0 |    468869 | 371230.0 | 467420.0 |   382928 | 467052 |
+|    4 | 409450.00 | 319568.0 |    434460 | 340291.0 | 154049.0 |     1440 | 260617 |
+|    5 | 389080.00 | 367824.0 |    445366 | 549658.0 | 620860.0 |     1440 | 138421 |
+
+There doesn’t appear to be a strong pattern in terms of the total
+activity count over the 5 weeks. Overall, the activity total appears
+highest on Mondays and lowest on Saturdays.
+
+Part c
+
+``` r
+ accel_df_p =
+  accel_df %>%
+  ggplot(aes(x = activity_minute, y = activity_count, color = day)) + 
+   geom_smooth(se=FALSE) 
+
+ggsave("accel_df_p.pdf", accel_df_p, width = 8, height = 5)
+```
+
+    ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+
+``` r
+accel_df_p
+```
+
+    ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+
+<img src="p8105_homework3_nf2466_files/figure-gfm/unnamed-chunk-8-1.png" width="90%" />
+
+Accelerometer data allows the inspection activity over the course of the
+day. Make a single-panel plot that shows the 24-hour activity time
+courses for each day and use color to indicate day of the week. Describe
+in words any patterns or conclusions you can make based on this graph
