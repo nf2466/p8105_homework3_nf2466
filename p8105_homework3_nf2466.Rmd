@@ -23,6 +23,7 @@ scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 ```
 ### Problem 1
+
 ```{r}
 data("instacart")
 ```
@@ -39,6 +40,7 @@ instacart %>%
 	arrange(desc(n))
 ```
 
+There are 134 aisles and the most items are from the fresh vegetables and the fresh fruits aisle.
 
 Let's make a plot
 
@@ -69,13 +71,23 @@ instacart %>%
 	knitr::kable()
 ```
 
+This table shows the top three product counts in baking ingredients, dog food care, and packaged vegetables/fruits.
 
 Apples vs ice cream..
 
 ```{r}
 instacart %>% 
 	filter(product_name %in% c("Pink Lady Apples", "Coffee Ice Cream")) %>% 
-	group_by(product_name, order_dow) %>% 
+	group_by(product_name, order_dow) %>%
+  mutate(order_dow=recode(order_dow,
+       "0"="Sunday",
+       "1"="Monday",
+       "2"="Tuesday",
+       "3"="Wednesday",
+       "4"="Thursday",
+       "5"="Friday",
+       "6"="Saturday"),
+       order_dow=as.factor(order_dow))%>%
 	summarize(mean_hour = mean(order_hour_of_day)) %>% 
 	pivot_wider(
 		names_from = order_dow,
@@ -83,6 +95,9 @@ instacart %>%
 	)%>%
   knitr::kable()
 ```
+
+This table shows people tend to buy Pink Lady Apples a little earlier in the day compared to coffee ice cream, although both seem be bought in the early to late afternoon.
+
 ### Problem 2
 
 _Part a: Load the dataset and tidy_

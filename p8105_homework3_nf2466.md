@@ -39,6 +39,9 @@ instacart %>%
     ## 10 bread                          23635
     ## # ... with 124 more rows
 
+There are 134 aisles and the most items are from the fresh vegetables
+and the fresh fruits aisle.
+
 Let’s make a plot
 
 ``` r
@@ -81,12 +84,24 @@ instacart %>%
 | packaged vegetables fruits | Organic Raspberries                           | 5546 |    2 |
 | packaged vegetables fruits | Organic Blueberries                           | 4966 |    3 |
 
+This table shows the top three product counts in baking ingredients, dog
+food care, and packaged vegetables/fruits.
+
 Apples vs ice cream..
 
 ``` r
 instacart %>% 
     filter(product_name %in% c("Pink Lady Apples", "Coffee Ice Cream")) %>% 
-    group_by(product_name, order_dow) %>% 
+    group_by(product_name, order_dow) %>%
+  mutate(order_dow=recode(order_dow,
+       "0"="Sunday",
+       "1"="Monday",
+       "2"="Tuesday",
+       "3"="Wednesday",
+       "4"="Thursday",
+       "5"="Friday",
+       "6"="Saturday"),
+       order_dow=as.factor(order_dow))%>%
     summarize(mean_hour = mean(order_hour_of_day)) %>% 
     pivot_wider(
         names_from = order_dow,
@@ -97,10 +112,14 @@ instacart %>%
 
     ## `summarise()` regrouping output by 'product_name' (override with `.groups` argument)
 
-| product\_name    |        0 |        1 |        2 |        3 |        4 |        5 |        6 |
-| :--------------- | -------: | -------: | -------: | -------: | -------: | -------: | -------: |
-| Coffee Ice Cream | 13.77419 | 14.31579 | 15.38095 | 15.31818 | 15.21739 | 12.26316 | 13.83333 |
-| Pink Lady Apples | 13.44118 | 11.36000 | 11.70213 | 14.25000 | 11.55172 | 12.78431 | 11.93750 |
+| product\_name    |   Sunday |   Monday |  Tuesday | Wednesday | Thursday |   Friday | Saturday |
+| :--------------- | -------: | -------: | -------: | --------: | -------: | -------: | -------: |
+| Coffee Ice Cream | 13.77419 | 14.31579 | 15.38095 |  15.31818 | 15.21739 | 12.26316 | 13.83333 |
+| Pink Lady Apples | 13.44118 | 11.36000 | 11.70213 |  14.25000 | 11.55172 | 12.78431 | 11.93750 |
+
+This table shows people tend to buy Pink Lady Apples a little earlier in
+the day compared to coffee ice cream, although both seem be bought in
+the early to late afternoon.
 
 ### Problem 2
 
