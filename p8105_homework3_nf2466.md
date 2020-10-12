@@ -295,7 +295,7 @@ values greater than 0 and less than 100 separately by year.*
   guides(color="none") +
   theme(legend.position = "right", legend.title = element_text(size = 10), legend.text = element_text(size = 8)) +
   labs(
-    title = "Min temperature vs max temperature",
+    caption = "Min temperature vs max temperature",
     x = "Minimum temperature (Celsius)",
     y = "Maximum temperature (Celsius)",
     size=rel(0.50)
@@ -307,7 +307,7 @@ snowfall_p =
   ggplot(aes(x =snow, y=year, group = year)) +
   ggridges::geom_density_ridges(scale = 0.85) + 
   labs(
-    title = "The Distribution of Snowfall",
+    caption = "The Distribution of Snowfall",
     y = "Year",
     x = "Snowfall in mm",
     size=rel(0.50)
