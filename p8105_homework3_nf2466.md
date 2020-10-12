@@ -1,7 +1,7 @@
 Homework 2
 ================
 Nancy Fang (nf2466)
-2020-10-09
+2020-10-11
 
 ### Problem 1
 
@@ -91,21 +91,20 @@ instacart %>%
     pivot_wider(
         names_from = order_dow,
         values_from = mean_hour
-    )
+    )%>%
+  knitr::kable()
 ```
 
     ## `summarise()` regrouping output by 'product_name' (override with `.groups` argument)
 
-    ## # A tibble: 2 x 8
-    ## # Groups:   product_name [2]
-    ##   product_name       `0`   `1`   `2`   `3`   `4`   `5`   `6`
-    ##   <chr>            <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>
-    ## 1 Coffee Ice Cream  13.8  14.3  15.4  15.3  15.2  12.3  13.8
-    ## 2 Pink Lady Apples  13.4  11.4  11.7  14.2  11.6  12.8  11.9
+| product\_name    |        0 |        1 |        2 |        3 |        4 |        5 |        6 |
+| :--------------- | -------: | -------: | -------: | -------: | -------: | -------: | -------: |
+| Coffee Ice Cream | 13.77419 | 14.31579 | 15.38095 | 15.31818 | 15.21739 | 12.26316 | 13.83333 |
+| Pink Lady Apples | 13.44118 | 11.36000 | 11.70213 | 14.25000 | 11.55172 | 12.78431 | 11.93750 |
 
 ### Problem 2
 
-Load the dataset and tidy
+*Part a: Load the dataset and tidy*
 
 ``` r
 accel_df=
@@ -133,7 +132,7 @@ accel_df=
 
     ## See spec(...) for full column specifications.
 
-Part b: Now, aggregate total day activity count.
+*Part b: Now, aggregate total day activity count.*
 
 ``` r
 accel_df%>%
@@ -160,7 +159,7 @@ There doesn’t appear to be a strong pattern in terms of the total
 activity count over the 5 weeks. Overall, the activity total appears
 highest on Mondays and lowest on Saturdays.
 
-Part c
+*Part c:*
 
 ``` r
  accel_df_p =
@@ -173,12 +172,6 @@ Part c
     y = "Activity count"
   )
 
-ggsave("accel_df_p.pdf", accel_df_p, width = 8, height = 5)
-```
-
-    ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
-
-``` r
 accel_df_p
 ```
 
@@ -192,11 +185,9 @@ minute 500-1000). We also see that on average, there is more activity in
 the morning/afternoon on Sunday and more activity in the evening time on
 Fridays.
 
------
+### Problem 3
 
-\#\#\#Problem 3
-
-Download the NOAA dataset from P8105
+*Part a: Download the NOAA dataset from P8105*
 
 ``` r
 library(p8105.datasets)
@@ -211,30 +202,126 @@ There are 145838 missing values for precipitation, 381221 missing values
 for snowfall, 591786 missing values for snow depth, 1134358 missing
 values for max temp and 1134420 missing values for min temp.
 
-Data cleaning: Do some data cleaning. Create separate variables for
-year, month, and day. Ensure observations for temperature,
-precipitation, and snowfall are given in reasonable units. For snowfall,
-what are the most commonly observed values? Why?
+*Data cleaning:*
 
 ``` r
-ny_noaa%>%
+noaa_df=
+  ny_noaa%>%
   janitor::clean_names()%>%
   separate(date, into = c('year','month','day')) %>%
   mutate(month = month.abb[as.factor(month)]) %>%
-  mutate_at(vars(year, day, tmax, tmin), as.numeric)
+  mutate_at(vars(year, day, tmax, tmin), as.numeric)%>%
+  mutate(tmax=tmax/10, tmin=tmin/10)
 ```
 
-    ## # A tibble: 2,595,176 x 9
-    ##    id           year month   day  prcp  snow  snwd  tmax  tmin
-    ##    <chr>       <dbl> <chr> <dbl> <int> <int> <int> <dbl> <dbl>
-    ##  1 US1NYAB0001  2007 Nov       1    NA    NA    NA    NA    NA
-    ##  2 US1NYAB0001  2007 Nov       2    NA    NA    NA    NA    NA
-    ##  3 US1NYAB0001  2007 Nov       3    NA    NA    NA    NA    NA
-    ##  4 US1NYAB0001  2007 Nov       4    NA    NA    NA    NA    NA
-    ##  5 US1NYAB0001  2007 Nov       5    NA    NA    NA    NA    NA
-    ##  6 US1NYAB0001  2007 Nov       6    NA    NA    NA    NA    NA
-    ##  7 US1NYAB0001  2007 Nov       7    NA    NA    NA    NA    NA
-    ##  8 US1NYAB0001  2007 Nov       8    NA    NA    NA    NA    NA
-    ##  9 US1NYAB0001  2007 Nov       9    NA    NA    NA    NA    NA
-    ## 10 US1NYAB0001  2007 Nov      10    NA    NA    NA    NA    NA
-    ## # ... with 2,595,166 more rows
+For snowfall, what are the most commonly observed values? Why?
+
+``` r
+noaa_df%>%
+  drop_na(snow)%>%
+  group_by(snow)%>%
+  summarize(snow_n=n())%>%
+  arrange(desc(snow_n))
+```
+
+    ## `summarise()` ungrouping output (override with `.groups` argument)
+
+    ## # A tibble: 281 x 2
+    ##     snow  snow_n
+    ##    <int>   <int>
+    ##  1     0 2008508
+    ##  2    25   31022
+    ##  3    13   23095
+    ##  4    51   18274
+    ##  5    76   10173
+    ##  6     8    9962
+    ##  7     5    9748
+    ##  8    38    9197
+    ##  9     3    8790
+    ## 10   102    6552
+    ## # ... with 271 more rows
+
+The most commonly observed value is 0. This is likely because it does
+not snow on most days of the year in New York.
+
+*Part b: Make a two-panel plot showing the average max temperature in
+January and in July in each station across years. Is there any
+observable / interpretable structure? Any outliers?*
+
+``` r
+noaa_avgtmax_p =
+  noaa_df%>%
+  drop_na(tmax)%>%
+  filter(month==c("Jan","Jul"))%>%
+  group_by(id,year,month)%>%
+  summarize(avg_tmax=mean(tmax))%>%
+  ggplot(aes(x = year, y = avg_tmax, group = id, color = id)) +
+  geom_point() +
+  geom_path() +
+  facet_grid(~month)+
+  guides(color="none") +
+  labs(
+    title = "Average max temperature in January and July by ID",
+    x = "Year",
+    y = "Average max temperature (Celsius)"
+  )
+```
+
+    ## `summarise()` regrouping output by 'id', 'year' (override with `.groups` argument)
+
+``` r
+noaa_avgtmax_p
+```
+
+<img src="p8105_homework3_nf2466_files/figure-gfm/unnamed-chunk-12-1.png" width="90%" />
+
+In general, we see that the average max temperature in Celsius is lower
+in January than in July. During years where the average max temperature
+was lower, all data points are lower. There does not seem to be a trend
+of increasing average max temperatures from these graphs. There are very
+few outliers in our data set.
+
+*Part c: Make a two-panel plot showing (i) tmax vs tmin for the full
+dataset; and (ii) make a plot showing the distribution of snowfall
+values greater than 0 and less than 100 separately by year.*
+
+``` r
+ maxvmin_p = 
+  noaa_df%>%
+  drop_na(tmax,tmin)%>%
+  group_by(id)%>%
+  ggplot(aes(x = tmin, y = tmax)) +
+  geom_hex(bins = 30) +
+  guides(color="none") +
+  theme(legend.position = "right", legend.title = element_text(size = 10), legend.text = element_text(size = 8)) +
+  labs(
+    title = "Min temperature vs max temperature",
+    x = "Minimum temperature (Celsius)",
+    y = "Maximum temperature (Celsius)",
+    size=rel(0.50)
+  )
+
+snowfall_p =
+  noaa_df %>%
+  filter(snow > 0 & snow < 100) %>%
+  ggplot(aes(x =snow, y=year, group = year)) +
+  ggridges::geom_density_ridges(scale = 0.85) + 
+  labs(
+    title = "The Distribution of Snowfall",
+    y = "Year",
+    x = "Snowfall in mm",
+    size=rel(0.50)
+    )
+
+maxvmin_p + snowfall_p
+```
+
+    ## Picking joint bandwidth of 3.76
+
+<img src="p8105_homework3_nf2466_files/figure-gfm/unnamed-chunk-13-1.png" width="90%" />
+
+The Tmin vs Tmax plot shows us that most places had a minimum
+temperature around 15 degrees Celsius and a maximum temperature around
+25 degrees Celsisus. The distribution of snowfall graph shows that days
+there was a total snowfall of between 0-40 mm but there were many days
+where snowfall was \~60 mm or even as high as \~75 mm.
